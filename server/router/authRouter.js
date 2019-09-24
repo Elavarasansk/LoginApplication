@@ -1,34 +1,27 @@
 const express = require('express');
 const router = express.Router();
 const jwt = require('jsonwebtoken');
+const { verifyToken } = require('../middleware/auth-check');
+const { registerUser } = require('../service/userService');
 
+router.post('/register',async(req,res)=>{
+      res.send(await registerUser(req.body));
+  });
 
-
-router.get('/auth',(req,res)=>{
-console.log('router method called..');
-res.send('done..');
-});
-
+  
 router.post('/login',(req,res)=>{
 const { username , password } = req.body;
 const token = jwt.sign({username : username},'elasu',{ expiresIn : "5m" });
 res.cookie('access_token' , token,
-    {maxAge : 600000});
+//{maxAge : 6000000}
+);
 res.send({token : token})
 });
 
-router.post('/verify',(req,res)=>{
-    const { access_token } = req.cookies;
-    console.log('access_token...',access_token);
-    try{
-    jwt.verify(access_token,"elasu");
-    }catch(e){
-      res.status(401);
-      res.send({error : 'JWT token expired.'});        
-    }
-    const payload = jwt.decode(access_token,'elasu');
-    res.send({data : payload})
-    });
+router.get('/profile',verifyToken,(req,res)=>{
+  const result = 'Welcome to profile..'.concat(req.headers.username);
+res.send(result);
+});
 
 
 module.exports = router;
