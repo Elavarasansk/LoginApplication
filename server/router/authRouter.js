@@ -2,15 +2,16 @@ const express = require('express');
 const router = express.Router();
 const jwt = require('jsonwebtoken');
 const { verifyToken } = require('../middleware/auth-check');
-const { registerUser } = require('../service/userService');
+const { registerUser , doLogin } = require('../service/userService');
 
 router.post('/register',async(req,res)=>{
-      res.send(await registerUser(req.body));
+	const data = await registerUser(req.body);
+      res.send({ data : data });
   });
 
   
-router.post('/login',(req,res)=>{
-const { username , password } = req.body;
+router.post('/login',async(req,res)=>{
+const username = await doLogin(req.body);
 const token = jwt.sign({username : username},'elasu',{ expiresIn : "5m" });
 res.cookie('access_token' , token,
 //{maxAge : 6000000}
